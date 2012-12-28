@@ -1,0 +1,228 @@
+<!doctype html>
+<html>
+  <head>
+     <title>Generating audio in real time</title>
+     <script type="text/javascript">
+      var Chord = (function(){
+        var ctr = function(notes){
+          if (!Array.isArray(notes)) notes = Object.prototype.slice.call(arguments, 0);
+
+          this.notes = notes;
+        }
+
+        return ctr;
+      })();
+
+      (function(){
+        var utils = window.utils = window.utils || {};
+
+        utils.playChord = function(notes){
+
+        };
+      })();
+
+      var Instrument = (function(){
+        var ctr = function(options){
+          this.options = {
+            numOutputs: 8
+          };
+
+          for (var key in options){
+            this.options[key] = options[key];
+          }
+
+          this.initOutputs();
+        };
+
+        ctr.prototype.initOutputs = function(){
+          this.outputs = [];
+          this.outputsInUse = [];
+          this.nextAvailableOutput = 0;
+          for (var i = this.options.numOutputs - 1; i >= 0; i--){
+            this.outputs[i] = new Audio();
+            this.outputs[i].mozSetup(1, 44100);
+          }
+        };
+
+        ctr.prototype.play = function(notes){
+          if (!Array.isArray(notes)) notes = [notes];
+
+          for (var i = notes.length - 1, output; i >= 0; i--){
+            // Make sure we're not out of outputs
+            // if ()
+            output = this.outputs[this.getOpenOutputIndex()];
+            output.mozWriteAudio(notes[i]);
+          };
+        };
+
+        ctr.prototype.getOpenOutputIndex = function(){
+          if (this.nextAvailableOutput > this.options.numOutputs)
+            this.nextAvailableOutput = 0;
+
+          if (this.outputsInUse.indexOf(this.nextAvailableOutput) === -1){
+            return this.nextAvailableOutput++;
+          }
+
+          this.nextAvailableOutput++;
+
+          return this.getOpenOutputIndex();
+        };
+
+        return ctr;
+      })();
+
+      /**
+       * Setup chord
+       */
+      document.addEventListener('DOMContentLoaded', function(){
+        var
+          javaChord = new Instrument()
+        , javaChord2 = new Instrument()
+        , chord = []
+        , tearTrails2Chord = []
+        , intervals = {}
+        , tearTrailsBtn = document.getElementById('tear-trails')
+        , tearTrails2Btn = document.getElementById('tear-trails-2')
+        , tearTrails = window.tearTrails = window.tearTrails || function(){
+            if (!intervals.tearTrails){
+              intervals.tearTrails = setInterval(function(){
+                javaChord.play(chord);
+              }, 800);
+              tearTrailsBtn.text = "Tear Trails Stop";
+            }else{
+              clearInterval(intervals.tearTrails);
+              intervals.tearTrails = false;
+              tearTrailsBtn.text = "Tear Trails Start";
+            }
+
+            javaChord.play(chord);
+          }
+        , tearTrails2 = window.tearTrails2 = window.tearTrails2 || function(){
+            if (!intervals.tearTrails2){
+              intervals.tearTrails2 = setInterval(function(){
+                if (!intervals.tearTrails2){
+                  clearInterval(intervals.tearTrails2);
+                  intervals.tearTrails2 = false;
+                }
+                javaChord.play(tearTrails2Chord);
+              }, 1000);
+              tearTrailsBtn.text = "Tear Trails2 Stop";
+            }else{
+              clearInterval(intervals.tearTrails2);
+              intervals.tearTrails2 = false;
+              tearTrails2Btn.text = "Tear Trails2 Start";
+            }
+
+            javaChord.play(tearTrails2Chord);
+          }
+        , globalChangerDivisor = 0
+        ;
+
+        // Note 1
+        // chord[0] = new Float32Array(220500);
+        // for (var i = 0; i < chord[0].length; i++) {
+        //   chord[0][i] = Math.sin( i / 20 );
+        // }
+
+        // Note 2
+        // chord[1] = new Float32Array(220500);
+        // for (var i = 0, startingLimit = 100, limit = startingLimit, n = 0, divisorNote = 16, peakDivisorNote = 24, isOpAddition = true; i < chord[1].length; i++) {
+        //   if (i % limit === 0){
+        //     if (isOpAddition) n++;
+        //     else n--;
+        //     if ((n + divisorNote) > peakDivisorNote){
+        //       isOpAddition = false;
+        //     }
+        //     limit += startingLimit;
+        //   }
+        //   chord[1][i] = Math.sin( i / (divisorNote + n) );
+        // }
+
+        // Note 3 - Arcade shit
+        chord[0] = new Float32Array(220500);
+        for (var i = 0, startingLimit = 4000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[0].length; i++){
+          if (i % startingLimit === 0){
+            if (isOpAddition){
+              n++;
+              if ((n + divisorNote) > peakDivisorNote){
+                isOpAddition = false;
+              }
+            }
+            else {
+              n--;
+              if ((n + divisorNote) <= 0){
+                isOpAddition = true;
+              }
+            }
+          }
+          chord[0][i] = Math.sin( i / n );
+        }
+
+        // Note 4 - Arcade shit lower
+        chord[1] = new Float32Array(220500);
+        for (var i = 0, startingLimit = 5000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[1].length; i++){
+          if (i % startingLimit === 0){
+            if (isOpAddition){
+              n++;
+              if ((n + divisorNote) > peakDivisorNote){
+                isOpAddition = false;
+              }
+            }
+            else {
+              n--;
+              if ((n + divisorNote) <= 0){
+                isOpAddition = true;
+              }
+            }
+          }
+          chord[1][i] = Math.sin( (i / 2) / n );
+        }
+
+        // Note 3 - Arcade shit
+        tearTrails2Chord[0] = new Float32Array(220500);
+        for (var i = 0, startingLimit = 1002, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < tearTrails2Chord[0].length; i++){
+          if (i % startingLimit === 0){
+            if (isOpAddition){
+              n++;
+              if ((n + divisorNote) > peakDivisorNote){
+                isOpAddition = false;
+              }
+            }
+            else {
+              n--;
+              if ((n + divisorNote) <= 0){
+                isOpAddition = true;
+              }
+            }
+          }
+          tearTrails2Chord[0][i] = Math.sin( i / n );
+        }
+
+        // Note 4 - Arcade shit lower
+        // tearTrails2Chord[1] = new Float32Array(220500);
+        // for (var i = 0, startingLimit = 5000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < tearTrails2Chord[1].length; i++){
+        //   if (i % startingLimit === 0){
+        //     if (isOpAddition){
+        //       n++;
+        //       if ((n + divisorNote) > peakDivisorNote){
+        //         isOpAddition = false;
+        //       }
+        //     }
+        //     else {
+        //       n--;
+        //       if ((n + divisorNote) <= 0){
+        //         isOpAddition = true;
+        //       }
+        //     }
+        //   }
+        //   tearTrails2Chord[1][i] = Math.sin( (i / 2) / n );
+        // }
+      });
+     </script>
+ </head>
+ <body>
+   <p>This demo plays a one second tone when you click the button below.</p>
+   <button onclick="tearTrails();" id="tear-trails">Tear Trails Start</button>
+   <button onclick="tearTrails2();" id="tear-trails-2">Tear Trails2 Start</button>
+ </body>
+ </html>
