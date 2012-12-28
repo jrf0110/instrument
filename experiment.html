@@ -24,7 +24,7 @@
       var Instrument = (function(){
         var ctr = function(options){
           this.options = {
-            numOutputs: 8
+            numOutputs: 16
           };
 
           for (var key in options){
@@ -62,8 +62,6 @@
           if (this.outputsInUse.indexOf(this.nextAvailableOutput) === -1){
             return this.nextAvailableOutput++;
           }
-
-          this.nextAvailableOutput++;
 
           return this.getOpenOutputIndex();
         };
@@ -139,28 +137,28 @@
         // }
 
         // Note 3 - Arcade shit
-        chord[0] = new Float32Array(220500);
-        for (var i = 0, startingLimit = 4000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[0].length; i++){
-          if (i % startingLimit === 0){
-            if (isOpAddition){
-              n++;
-              if ((n + divisorNote) > peakDivisorNote){
-                isOpAddition = false;
-              }
-            }
-            else {
-              n--;
-              if ((n + divisorNote) <= 0){
-                isOpAddition = true;
-              }
-            }
-          }
-          chord[0][i] = Math.sin( i / n );
-        }
+        // chord[0] = new Float32Array(220500);
+        // for (var i = 0, startingLimit = 4000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[0].length; i++){
+        //   if (i % startingLimit === 0){
+        //     if (isOpAddition){
+        //       n++;
+        //       if ((n + divisorNote) > peakDivisorNote){
+        //         isOpAddition = false;
+        //       }
+        //     }
+        //     else {
+        //       n--;
+        //       if ((n + divisorNote) <= 0){
+        //         isOpAddition = true;
+        //       }
+        //     }
+        //   }
+        //   chord[0][i] = Math.sin( i / n );
+        // }
 
         // Note 4 - Arcade shit lower
         chord[1] = new Float32Array(220500);
-        for (var i = 0, startingLimit = 5000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[1].length; i++){
+        for (var i = 0, startingLimit = 10000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < chord[1].length; i++){
           if (i % startingLimit === 0){
             if (isOpAddition){
               n++;
@@ -175,12 +173,13 @@
               }
             }
           }
-          chord[1][i] = Math.sin( (i / 2) / n );
+          chord[1][i] = Math.sin( (i / 4) / (Math.cos(n) - 5)  );
+          // chord[1][i] = Math.sin( (i / 4) / 32 );
         }
 
-        // Note 3 - Arcade shit
-        tearTrails2Chord[0] = new Float32Array(220500);
-        for (var i = 0, startingLimit = 1002, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < tearTrails2Chord[0].length; i++){
+        // Note 4 - Arcade shit lower
+        tearTrails2Chord[1] = new Float32Array(220500);
+        for (var i = 0, startingLimit = 10000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < tearTrails2Chord[1].length; i++){
           if (i % startingLimit === 0){
             if (isOpAddition){
               n++;
@@ -195,7 +194,28 @@
               }
             }
           }
-          tearTrails2Chord[0][i] = Math.sin( i / n );
+          tearTrails2Chord[1][i] = Math.sin( (i / 4) / (Math.cos(n) - 5)  );
+          // tearTrails2Chord[1][i] = Math.sin( (i / 4) / 32 );
+        }
+
+        tearTrails2Chord[2] = new Float32Array(220500);
+        for (var i = 0, startingLimit = 10000, limit = startingLimit, n = 0, divisorNote = 12, peakDivisorNote = 24, isOpAddition = true; i < tearTrails2Chord[2].length; i++){
+          if (i % startingLimit === 0){
+            if (isOpAddition){
+              n++;
+              if ((n + divisorNote) > peakDivisorNote){
+                isOpAddition = false;
+              }
+            }
+            else {
+              n--;
+              if ((n + divisorNote) <= 0){
+                isOpAddition = true;
+              }
+            }
+          }
+          tearTrails2Chord[2][i] = Math.sin( (i / 4) / (Math.cos(n) - 3.8)  );
+          // tearTrails2Chord[1][i] = Math.sin( (i / 4) / 32 );
         }
 
         // Note 4 - Arcade shit lower
